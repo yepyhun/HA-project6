@@ -1,0 +1,71 @@
+{
+  "name": "ingest_raw_v0_4_domparser_alerts_cooldown",
+  "nodes": [
+    {
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Postgres set cooldown(+10m)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "query": "UPDATE control_state SET value = to_jsonb((now() at time zone 'UTC') + interval '10 minutes') WHERE key='cooldown_until';"
+      }
+    },
+    {
+      "name": "Postgres clear cooldown",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "query": "UPDATE control_state SET value = to_jsonb(NULL) WHERE key='cooldown_until';"
+      }
+    },
+    {
+      "name": "Code: Eval kill/cooldown",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "functionCode": "return [{json:{}}];"
+      }
+    },
+    {
+      "name": "HTML Extract",
+      "type": "n8n-nodes-base.htmlExtract",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "extractionValues": [
+          {
+            "key": "a_href",
+            "cssSelector": ".uad-list .media h1 a",
+            "returnArray": true,
+            "attribute": "href"
+          }
+        ]
+      }
+    }
+  ],
+  "connections": {}
+}

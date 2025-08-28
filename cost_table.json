@@ -1,0 +1,22 @@
+{
+  "openai": {
+    "gpt-4o-mini": {
+      "prompt_per_1k": 5.0,
+      "completion_per_1k": 15.0
+    },
+    "gpt-4o": {
+      "prompt_per_1k": 25.0,
+      "completion_per_1k": 75.0
+    }
+  },
+  "ollama": {
+    "llama3:8b": {
+      "prompt_per_1k": 1.0,
+      "completion_per_1k": 1.0
+    },
+    "llama3:70b": {
+      "prompt_per_1k": 3.0,
+      "completion_per_1k": 3.0
+    }
+  }
+}

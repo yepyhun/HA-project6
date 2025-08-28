@@ -1,0 +1,124 @@
+{
+  "name": "normalize_and_decide_v0_4_schema_budget_daily",
+  "nodes": [
+    {
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Read listing_norm.schema.json",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        -100
+      ],
+      "parameters": {
+        "filePath": "/project/listing_norm.schema.json"
+      }
+    },
+    {
+      "name": "Binary \u2192 Text (schema)",
+      "type": "n8n-nodes-base.binaryToText",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -100
+      ],
+      "parameters": {
+        "binaryPropertyName": "data"
+      }
+    },
+    {
+      "name": "Code: Store Schema (global)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        -100
+      ],
+      "parameters": {
+        "functionCode": "this.getWorkflowStaticData('global')._listingSchema = {}; return items;"
+      }
+    },
+    {
+      "name": "Code: Validate (JSON Schema)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        100,
+        0
+      ],
+      "parameters": {
+        "functionCode": "return [items,[]];"
+      }
+    },
+    {
+      "name": "Postgres Select cost_spent_huf",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {
+        "query": "SELECT value FROM control_state WHERE key='cost_spent_huf';"
+      }
+    },
+    {
+      "name": "Code: Attach spent_today",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        380,
+        200
+      ],
+      "parameters": {
+        "functionCode": "return items;"
+      }
+    },
+    {
+      "name": "Code: Decide (tariff & daily budget)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -100
+      ],
+      "parameters": {
+        "functionCode": "return items;"
+      }
+    },
+    {
+      "name": "Postgres Insert audit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        760,
+        -100
+      ],
+      "parameters": {
+        "query": "INSERT INTO decision_audit(listing_id, decision, fit_score, risk_score, explanation, evidence) VALUES ($1,$2,$3,$4,$5,$6::jsonb);"
+      }
+    },
+    {
+      "name": "UPDATE control_state SET value = jsonb_build_object('date', $1, 'spent', $2)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -100
+      ],
+      "parameters": {
+        "query": "UPDATE control_state SET value = jsonb_build_object('date', $1, 'spent', $2) WHERE key='cost_spent_huf';"
+      }
+    }
+  ],
+  "connections": {}
+}
